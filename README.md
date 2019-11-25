@@ -1,0 +1,2 @@
+# algen
+Algorytm Genetyczny
