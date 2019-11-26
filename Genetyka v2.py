@@ -164,6 +164,7 @@ def f_Mutagen(mutant, output = False):
     if output: print("Mutacja na pozycji %s:\t %s \n" % (pozycja_mutacji+1, mutant))
     return(mutant)
 
+
 # f_Pokolenie() - wyznacza kolejną pulę osobników z uwzględnieniem algorytmu genetycznego 
 def f_Pokolenie(pula):
     
@@ -175,6 +176,9 @@ def f_Pokolenie(pula):
     global wartosc_srednia_ew
 
     print("\n ********** Przetwarzam pokolenie nr %s" % iteracja)
+    print(len(pula))
+    print(*pula)
+    print("\n")
 
     pokolenie_dzieci=list()
     for i in (range(pop_size)):
@@ -185,68 +189,70 @@ def f_Pokolenie(pula):
         
         elif operacja > Pm:
             print("Krzyżowanie osobnika %s" % i)
-            potomstwo = f_Krzyzowanie(pokolenie_rodzicow[i], pokolenie_rodzicow[rand.randint(0, pop_size-1)], True)
+            potomstwo = f_Krzyzowanie(pokolenie_rodzicow[i], pokolenie_rodzicow[rand.randint(0, pop_size-1)], False)
             pokolenie_dzieci.append(potomstwo[0])
             pokolenie_dzieci.append(potomstwo[1]) # tutaj też jest brzydko, bo mamy na twardo "rodzinę 2+2"
+            iteracja = iteracja + 1
         else:
             print("Mutacja osobnika %s: \t %s" % (i, pokolenie_rodzicow[i]))
-            pokolenie_dzieci.append(f_Mutagen(pokolenie_rodzicow[i], 1)) # pokolenie_dzieci = f_CMC(pokolenie_rodzicow)
+            pokolenie_dzieci.append(f_Mutagen(pokolenie_rodzicow[i], False)) # pokolenie_dzieci = f_CMC(pokolenie_rodzicow)
     wartosc_srednia_ew.append(sum(ewaluacja_pokolenia)/pop_size) #  przebieg średniej wartości funkcji dopasowania pokolenia w funkcji nr pokolenia
     iteracja = iteracja + 1
 
 # rekurencja po zmiennej "iteracja" do zmiennej "Gen" - główna pętla programu
-    if iteracja == Gen:
-        print("%s *** Przetworzono ostatnie pokolenie nr %s \n" % (iteracja, iteracja))
+    if iteracja >= Gen:
+        print("****** Przetworzono ostatnie pokolenie nr %s \n" % iteracja)
         return(pokolenie_dzieci)
     else:
         return(f_Pokolenie(pokolenie_dzieci))
  
+
 wartosc_srednia_ew=[]
 
 def form_button():
-    global iteracja 
-    global wartosc_srednia_ew
-    iteracja = 0
-    wartosc_srednia_ew=[]
-
+    
     global pop_size, Gen, m, Pc, Pm
+    global iteracja, wartosc_srednia_ew
 
-    pop_size=int(form_pop_size.get())
-    Gen = int(form_gen.get())
-
+    pop_size = form_pop_size.get()
+    Gen = form_gen.get()
     Pc = form_Pcross.get()
     Pm = form_Pmutation.get()
 
-    
-    print("Wartości uruchomieniowe: Pop: %s, Gen: %s, Pc: %s, Pm: %s, Wart_srednia: %s" % (pop_size, Gen, Pc, Pm, wartosc_srednia_ew))
+    iteracja = 0
+    wartosc_srednia_ew=[]
 
-    try:
-        pierwsze_pokolenie = f_Pokolenie_zero(pop_size, m) # losujemy osobniki w pierwszym pokoleniu
-        print("Utworzono Pokolenie Zero.")
-    except:
-        print("Nie utworzono Pokolenia Zero!")
+    if (Pc+Pm)<=1:
+        print("Wartości uruchomieniowe: Pop: %s, Gen: %s, Pc: %s, Pm: %s, Wart_srednia: %s" % (pop_size, Gen, Pc, Pm, wartosc_srednia_ew))
 
-    start = time.time()
-    ostatnie_pokolenie=f_Pokolenie(pierwsze_pokolenie)
-    end = time.time()
-    
-    the_chosen_one = max(f_Ewaluacja(ostatnie_pokolenie))
-    form_max_value.set(the_chosen_one)
-    print("Guru is happy!")
-    #print(*wartosc_srednia_ew)
+        try:
+            pierwsze_pokolenie = f_Pokolenie_zero(pop_size, m) # losujemy osobniki w pierwszym pokoleniu
+            print("Utworzono Pokolenie Zero.")
+        except:
+            print("Nie utworzono Pokolenia Zero!")
 
+        start = time.time()
+        ostatnie_pokolenie=f_Pokolenie(pierwsze_pokolenie)
+        end = time.time()
+        
+        the_chosen_one = max(f_Ewaluacja(ostatnie_pokolenie))
+        form_max_value.set(the_chosen_one)
+        print("Guru is happy!")
+        #print(*wartosc_srednia_ew)
+    else:
+        messagebox.showinfo("Błąd wprowadzonych wartości P", "Suma prawdopodobieństw krzyżowania i mutacji nie może przekroczyć 1")
 
 root=tk.Tk()
 
 root.title("Laboratorium 3: Algorytm genetyczny, wyznaczanie max funkcji. R.Majkowski (233256), M. Witomski (233270)")
 root.configure(bg='white', padx=20, pady=20)
 
-form_pop_size = StringVar()
+form_pop_size = IntVar()
 form_pop_size.set(pop_size)
 tk.Entry(root, bg="white", textvariable=form_pop_size).grid(row=0, column=0, padx=10, sticky=tk.W)
 tk.Label(root, text="Liczba osobników: ", bg="white", padx = 10).grid(row=1, column=0, padx=10, sticky=tk.W)
 
-form_gen = StringVar()
+form_gen = IntVar()
 form_gen.set(Gen)
 tk.Entry(root, bg="white", textvariable=form_gen).grid(row=0, column=1, padx=10, sticky=tk.W)
 tk.Label(root, text="Liczba pokoleń: ", bg="white", padx = 10).grid(row=1, column=1, padx=10, sticky=tk.W)
@@ -258,10 +264,10 @@ tk.Label(root, text="P. krzyżowania: ", bg="white", padx = 10).grid(row=1, colu
 
 form_Pmutation = DoubleVar()
 form_Pmutation.set(Pm)
-tk.Entry(root, bg="white", textvariable=form_Pmutation).grid(row=0, column=3, padx=10, sticky=tk.W)
-tk.Label(root, text="P. mutacji: ", bg="white", padx = 10).grid(row=1, column=3, padx=10, sticky=tk.W)
+tk.Entry(root, bg="white", textvariable = form_Pmutation).grid(row=0, column=3, padx=10, sticky=tk.W)
+tk.Label(root, text="P. mutacji: ", bg = "white", padx = 10).grid(row=1, column=3, padx=10, sticky=tk.W)
 
-tk.Button(text="Uruchom", command=form_button).grid(row=0, column=4, padx=10, sticky=tk.W)
+tk.Button(text="Uruchom", command = form_button).grid(row=0, column=4, padx=10, sticky=tk.W)
 
 form_max_value = StringVar() # testowa kontrolka dla dowolnej wartości
 form_max_value.set(0)
@@ -280,7 +286,7 @@ canvas = FigureCanvasTkAgg(fig, master=root)  # A tk.DrawingArea.
 canvas.draw()
 
 root.mainloop()
-root.destroy()
+
      
      
      
