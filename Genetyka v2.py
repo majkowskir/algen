@@ -146,24 +146,18 @@ def f_Ruletka(p_selekcji, populacja, output=False):
     # Krzyżowanie osobników: z puli rodzicielskiej losujemy pop_size/2 par z powtórzeniami
 # losujemy losowe_Pc prawdopodobieństwo krzyżowania Pc
 
-def f_Mutagen(mutant): 
-
-        mutant.append(int (not(pula[i][j]))) # tutaj jest brzydko, bool rzutujemy na int aby później wrócić do np.asarray 
-        pozycja_mutacji.append(j)
-    else:
-        mutant.append(int(pula[i][j]))
-        pula_mutantow.append(np.asarray(mutant))
-        if output: print(str(pula[i]) +" uległ mutacji na pozycji: "+ str(pozycja_mutacji) +", obecnie wygląda tak: "+ str(np.asarray(mutant)))
-return(pula_mutantow)
-
+def f_Mutagen(mutant, output = False): 
+    pozycja_mutacji = rand.randint(0, m-1)
+    mutant[pozycja_mutacji] = not(mutant [pozycja_mutacji])
+    if output: print("Mutacja na pozycji: %s, obecnie osobnik wygląda tak: %s" % (pozycja_mutacji, mutant))
+    return(mutant)
 
 # f_Pokolenie() - wyznacza kolejną pulę osobników z uwzględnieniem algorytmu genetycznego 
 def f_Pokolenie(pula):
-    
     ewaluacja_pokolenia = f_Ewaluacja(pula, 0) # obliczamy wartosci funkcji dla puli osobnikow (jednego pokolenia)
     prawdopodobienstwo_sel = f_Pselekcji(ewaluacja_pokolenia) # obliczamy prawdopodobienstwo selekcji dla poszczegolnych osobnikow
     pokolenie_rodzicow = f_Ruletka(prawdopodobienstwo_sel, pula) # losujemy pokolenie rodziców metodą ruletki
-    
+
     pokolenie_dzieci=list()
     for i in (range(pop_size)):
         operacja = rand.random() # tutaj losujemy operację na pokoleniu rodzicow: krzyzowanie lub mutacja lub kopiowanie (wg wytycznych wykładowych)
@@ -174,17 +168,16 @@ def f_Pokolenie(pula):
             print("Krzyżowanie osobnika %s" % i)
             pokolenie_dzieci.append(pokolenie_rodzicow[i])
         else:
-            print("Mutacja osobnika %s" % i)
-            pokolenie_dzieci.append(pokolenie_rodzicow[i])
-            
-    
-    #pokolenie_dzieci = f_CMC(pokolenie_rodzicow)
+            print("Mutacja osobnika %s: %s" % (i, pokolenie_rodzicow[i]))
+            pokolenie_dzieci.append(f_Mutagen(pokolenie_rodzicow[i], 1))
+
+# pokolenie_dzieci = f_CMC(pokolenie_rodzicow)
     global iteracja
     global wartosc_srednia_ew
     wartosc_srednia_ew.append(sum(ewaluacja_pokolenia)/pop_size) #  przebieg średniej wartości funkcji dopasowania pokolenia w funkcji nr pokolenia
     iteracja = iteracja + 1
 
-    # rekurencja po zmiennej "iteracja" do zmiennej "Gen" - główna pętla programu
+# rekurencja po zmiennej "iteracja" do zmiennej "Gen" - główna pętla programu
     if iteracja == Gen:
         print("%s *** Przetworzono ostatnie pokolenie nr %s \n" % (iteracja, iteracja))
         return(pokolenie_dzieci)
@@ -226,8 +219,7 @@ def form_button():
     print("Guru is happy!")
     #print(*wartosc_srednia_ew)
 
-    
-    
+
 root=tk.Tk()
 
 root.title("Laboratorium 3: Algorytm genetyczny, wyznaczanie max funkcji. R.Majkowski (233256), M. Witomski (233270)")
