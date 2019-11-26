@@ -145,16 +145,19 @@ def f_Ruletka(p_selekcji, populacja, output=False):
     
     # Krzyżowanie osobników: z puli rodzicielskiej losujemy pop_size/2 par z powtórzeniami
 # losujemy losowe_Pc prawdopodobieństwo krzyżowania Pc
-# tutaj pytanie, czy losujemy parę dla każdego osobnika z populacji? czy osobnik może wylosować sam siebie?
 
-# funkcja f_Krzyzowanie() przyjmuje pulę osobników do krzyżowania,
-# zwraca pulę osobników potomnych
+def f_Mutagen(mutant): 
+
+        mutant.append(int (not(pula[i][j]))) # tutaj jest brzydko, bool rzutujemy na int aby później wrócić do np.asarray 
+        pozycja_mutacji.append(j)
+    else:
+        mutant.append(int(pula[i][j]))
+        pula_mutantow.append(np.asarray(mutant))
+        if output: print(str(pula[i]) +" uległ mutacji na pozycji: "+ str(pozycja_mutacji) +", obecnie wygląda tak: "+ str(np.asarray(mutant)))
+return(pula_mutantow)
 
 
 # f_Pokolenie() - wyznacza kolejną pulę osobników z uwzględnieniem algorytmu genetycznego 
-
-
-
 def f_Pokolenie(pula):
     
     ewaluacja_pokolenia = f_Ewaluacja(pula, 0) # obliczamy wartosci funkcji dla puli osobnikow (jednego pokolenia)
@@ -164,7 +167,7 @@ def f_Pokolenie(pula):
     pokolenie_dzieci=list()
     for i in (range(pop_size)):
         operacja = rand.random() # tutaj losujemy operację na pokoleniu rodzicow: krzyzowanie lub mutacja lub kopiowanie (wg wytycznych wykładowych)
-        if operacja>(Pc+Pm):
+        if operacja > (Pc+Pm):
             print("Kopiowanie osobnika %s" % i)
             pokolenie_dzieci.append(pokolenie_rodzicow[i])
         elif operacja > Pm:
