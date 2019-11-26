@@ -49,14 +49,14 @@ def funkcja(argument):
 
 
 # Parametry początkowe programu: liczba pokoleń (Gen), liczba zmiennych w funkcji (k), przedział (Xmin, Xmax), dokładność (d)
-Gen = 5
+Gen = 50
 
 # pop_size - liczebność populacji, dobrze, aby była parzysta
-pop_size = 3
+pop_size = 300
 
 # prawdopodobieństwa: krzyżowania (Pc) oraz mutacji (Pm)
-Pc = 0.0
-Pm = 0.0
+Pc = 0.75
+Pm = 0.1
 
 # Funkcja celu jest funkcją jednej zmiennej (k), nie jest używana w tej wersji programu
 k = 1
@@ -166,8 +166,8 @@ def f_Mutagen(mutant, output = False):
 
 
 # f_Pokolenie() - wyznacza kolejną pulę osobników z uwzględnieniem algorytmu genetycznego 
-def f_Pokolenie(pula):
-    
+def f_Pokolenie(pula, output = False):
+
     ewaluacja_pokolenia = f_Ewaluacja(pula, 0) # obliczamy wartosci funkcji dla puli osobnikow (jednego pokolenia)
     prawdopodobienstwo_sel = f_Pselekcji(ewaluacja_pokolenia) # obliczamy prawdopodobienstwo selekcji dla poszczegolnych osobnikow
     pokolenie_rodzicow = f_Ruletka(prawdopodobienstwo_sel, pula) # losujemy pokolenie rodziców metodą ruletki
@@ -175,45 +175,50 @@ def f_Pokolenie(pula):
     global iteracja
     global wartosc_srednia_ew
 
-    print("\n ********** Przetwarzam pokolenie nr %s" % iteracja)
-    print(len(pula))
-    print(*pula)
-    print("\n")
-
+    if output: print("\n ********** Przetwarzam pokolenie nr %s" % iteracja)
+    
     pokolenie_dzieci=list()
-    for i in (range(pop_size)):
+    
+    
+    numeracja = iter(range(pop_size)) # iterator niezbędny do operacji wewnątrz pętli
+
+    for i in numeracja:
+        print(i)
         operacja = rand.random() # tutaj losujemy operację na pokoleniu rodzicow: krzyzowanie lub mutacja lub kopiowanie (wg wytycznych wykładowych)
         if operacja > (Pc+Pm):
-            print("Kopiowanie osobnika %s" % i)
+            if output: print("Kopiowanie osobnika %s" % i)
             pokolenie_dzieci.append(pokolenie_rodzicow[i])
-        
         elif operacja > Pm:
-            print("Krzyżowanie osobnika %s" % i)
+            if output: print("Krzyżowanie osobnika %s" % i)
             potomstwo = f_Krzyzowanie(pokolenie_rodzicow[i], pokolenie_rodzicow[rand.randint(0, pop_size-1)], False)
-            pokolenie_dzieci.append(potomstwo[0])
-            pokolenie_dzieci.append(potomstwo[1]) # tutaj też jest brzydko, bo mamy na twardo "rodzinę 2+2"
-            iteracja = iteracja + 1
+            try:
+                next(numeracja) # próba przeskoczenia iteracji o 2, jeśl się nie uda, do kolejnej puli jest dopisywane tylko jedno "dziecko"
+                pokolenie_dzieci.append(potomstwo[0]) # tutaj też jest brzydko, bo mamy na twardo "rodzinę 2+2"
+                pokolenie_dzieci.append(potomstwo[1])
+            except:
+                pokolenie_dzieci.append(potomstwo[0])
         else:
-            print("Mutacja osobnika %s: \t %s" % (i, pokolenie_rodzicow[i]))
+            if output: print("Mutacja osobnika %s: \t %s" % (i, pokolenie_rodzicow[i]))
             pokolenie_dzieci.append(f_Mutagen(pokolenie_rodzicow[i], False)) # pokolenie_dzieci = f_CMC(pokolenie_rodzicow)
-    wartosc_srednia_ew.append(sum(ewaluacja_pokolenia)/pop_size) #  przebieg średniej wartości funkcji dopasowania pokolenia w funkcji nr pokolenia
+    
+    print("Liczebność pokolenia potomnego: %s" % len(pokolenie_dzieci))
+    
+    wartosc_srednia_ew.append(round((sum(ewaluacja_pokolenia)/pop_size),d)) #  przebieg średniej wartości funkcji dopasowania pokolenia w funkcji nr pokolenia
     iteracja = iteracja + 1
 
 # rekurencja po zmiennej "iteracja" do zmiennej "Gen" - główna pętla programu
     if iteracja >= Gen:
-        print("****** Przetworzono ostatnie pokolenie nr %s \n" % iteracja)
+        print("Przetworzono ostatnie pokolenie nr %s \n" % iteracja)
         return(pokolenie_dzieci)
     else:
         return(f_Pokolenie(pokolenie_dzieci))
  
 
-wartosc_srednia_ew=[]
-
 def form_button():
-    
     global pop_size, Gen, m, Pc, Pm
     global iteracja, wartosc_srednia_ew
 
+    # pobieramy wartości wejściowe z formularza
     pop_size = form_pop_size.get()
     Gen = form_gen.get()
     Pc = form_Pcross.get()
@@ -237,6 +242,8 @@ def form_button():
         
         the_chosen_one = max(f_Ewaluacja(ostatnie_pokolenie))
         form_max_value.set(the_chosen_one)
+
+        print("Wartości wyjsciowe: Pop: %s, Gen: %s, Pc: %s, Pm: %s, Wart_srednia: %s" % (pop_size, Gen, Pc, Pm, wartosc_srednia_ew))
         print("Guru is happy!")
         #print(*wartosc_srednia_ew)
     else:
@@ -269,21 +276,12 @@ tk.Label(root, text="P. mutacji: ", bg = "white", padx = 10).grid(row=1, column=
 
 tk.Button(text="Uruchom", command = form_button).grid(row=0, column=4, padx=10, sticky=tk.W)
 
-form_max_value = StringVar() # testowa kontrolka dla dowolnej wartości
+form_max_value = DoubleVar() # testowa kontrolka dla dowolnej wartości
 form_max_value.set(0)
-tk.Label(root, textvariable=form_max_value, bg="white", padx = 10).grid(row=2, column=0, padx=10, sticky=tk.W)
+tk.Label(root, textvariable=form_max_value, bg="white").grid(row=2, column=0, padx=10, sticky=tk.W)
 
-wykres = tk.Canvas(root, width=800, height=400)
-wykres.grid(row=3, column=0, columnspan=5, sticky=tk.W)
 # wykres.create_text(200, 20,fill="darkblue",font="Times 12 italic bold", tex = vtext)
 # wykres.create_line(0, 0, 200, 100)
-
-fig = Figure(figsize=(5, 4), dpi=100)
-t = np.arange(0, 3, .01)
-fig.add_subplot(111).plot(t, 2 * np.sin(2 * np.pi * t))
-
-canvas = FigureCanvasTkAgg(fig, master=root)  # A tk.DrawingArea.
-canvas.draw()
 
 root.mainloop()
 
