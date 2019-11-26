@@ -146,27 +146,35 @@ def f_Ruletka(p_selekcji, populacja, output=False):
     # Krzyżowanie osobników: z puli rodzicielskiej losujemy pop_size/2 par z powtórzeniami
 # losujemy losowe_Pc prawdopodobieństwo krzyżowania Pc
 
-def f_Krzyzowanie(rodzic_1, rodzic_2, output = False):
-    dziecko_1 = rodzic_1
-    dziecko_2 = rodzic_2
+def f_Krzyzowanie(parent_1, parent_2, output = False):
+    punkt_krzyzowania = rand.randint(1, m-1) # punkt krzyżowania, przecięcie chromosomu najwcześniej za pierwszym bitem, najpóźniej za przedostatnim
 
-
-
-    if output: print("Krzyżowanie przebiegło pomyślnie.")
+    dziecko_1 = np.concatenate((parent_1[:punkt_krzyzowania], parent_2[punkt_krzyzowania:]), axis=None)   
+    dziecko_2 = np.concatenate((parent_2[:punkt_krzyzowania], parent_1[punkt_krzyzowania:]), axis=None)
+    
+    if output: 
+        print("Para rodziców: %s x %s, Krzyżowanie po bicie: %s" % (parent_1, parent_2, punkt_krzyzowania))
+        print("Para potomków: %s - %s \n" % (dziecko_1, dziecko_2))
     return [dziecko_1, dziecko_2] # lista dla dwóch zwracanych wartości
 
 
 def f_Mutagen(mutant, output = False): 
     pozycja_mutacji = rand.randint(0, m-1)
     mutant[pozycja_mutacji] = not(mutant [pozycja_mutacji])
-    if output: print("Mutacja na pozycji %s:\t %s" % (pozycja_mutacji+1, mutant))
+    if output: print("Mutacja na pozycji %s:\t %s \n" % (pozycja_mutacji+1, mutant))
     return(mutant)
 
 # f_Pokolenie() - wyznacza kolejną pulę osobników z uwzględnieniem algorytmu genetycznego 
 def f_Pokolenie(pula):
+    
     ewaluacja_pokolenia = f_Ewaluacja(pula, 0) # obliczamy wartosci funkcji dla puli osobnikow (jednego pokolenia)
     prawdopodobienstwo_sel = f_Pselekcji(ewaluacja_pokolenia) # obliczamy prawdopodobienstwo selekcji dla poszczegolnych osobnikow
     pokolenie_rodzicow = f_Ruletka(prawdopodobienstwo_sel, pula) # losujemy pokolenie rodziców metodą ruletki
+
+    global iteracja
+    global wartosc_srednia_ew
+
+    print("\n ********** Przetwarzam pokolenie nr %s" % iteracja)
 
     pokolenie_dzieci=list()
     for i in (range(pop_size)):
@@ -182,11 +190,7 @@ def f_Pokolenie(pula):
             pokolenie_dzieci.append(potomstwo[1]) # tutaj też jest brzydko, bo mamy na twardo "rodzinę 2+2"
         else:
             print("Mutacja osobnika %s: \t %s" % (i, pokolenie_rodzicow[i]))
-            pokolenie_dzieci.append(f_Mutagen(pokolenie_rodzicow[i], 1))
-
-# pokolenie_dzieci = f_CMC(pokolenie_rodzicow)
-    global iteracja
-    global wartosc_srednia_ew
+            pokolenie_dzieci.append(f_Mutagen(pokolenie_rodzicow[i], 1)) # pokolenie_dzieci = f_CMC(pokolenie_rodzicow)
     wartosc_srednia_ew.append(sum(ewaluacja_pokolenia)/pop_size) #  przebieg średniej wartości funkcji dopasowania pokolenia w funkcji nr pokolenia
     iteracja = iteracja + 1
 
@@ -195,7 +199,6 @@ def f_Pokolenie(pula):
         print("%s *** Przetworzono ostatnie pokolenie nr %s \n" % (iteracja, iteracja))
         return(pokolenie_dzieci)
     else:
-        print("%s *** Przetwarzono pokolenie nr %s \n" % (iteracja, iteracja))
         return(f_Pokolenie(pokolenie_dzieci))
  
 wartosc_srednia_ew=[]
