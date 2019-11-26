@@ -146,10 +146,20 @@ def f_Ruletka(p_selekcji, populacja, output=False):
     # Krzyżowanie osobników: z puli rodzicielskiej losujemy pop_size/2 par z powtórzeniami
 # losujemy losowe_Pc prawdopodobieństwo krzyżowania Pc
 
+def f_Krzyzowanie(rodzic_1, rodzic_2, output = False):
+    dziecko_1 = rodzic_1
+    dziecko_2 = rodzic_2
+
+
+
+    if output: print("Krzyżowanie przebiegło pomyślnie.")
+    return [dziecko_1, dziecko_2] # lista dla dwóch zwracanych wartości
+
+
 def f_Mutagen(mutant, output = False): 
     pozycja_mutacji = rand.randint(0, m-1)
     mutant[pozycja_mutacji] = not(mutant [pozycja_mutacji])
-    if output: print("Mutacja na pozycji: %s, obecnie osobnik wygląda tak: %s" % (pozycja_mutacji, mutant))
+    if output: print("Mutacja na pozycji %s:\t %s" % (pozycja_mutacji+1, mutant))
     return(mutant)
 
 # f_Pokolenie() - wyznacza kolejną pulę osobników z uwzględnieniem algorytmu genetycznego 
@@ -164,11 +174,14 @@ def f_Pokolenie(pula):
         if operacja > (Pc+Pm):
             print("Kopiowanie osobnika %s" % i)
             pokolenie_dzieci.append(pokolenie_rodzicow[i])
+        
         elif operacja > Pm:
             print("Krzyżowanie osobnika %s" % i)
-            pokolenie_dzieci.append(pokolenie_rodzicow[i])
+            potomstwo = f_Krzyzowanie(pokolenie_rodzicow[i], pokolenie_rodzicow[rand.randint(0, pop_size-1)], True)
+            pokolenie_dzieci.append(potomstwo[0])
+            pokolenie_dzieci.append(potomstwo[1]) # tutaj też jest brzydko, bo mamy na twardo "rodzinę 2+2"
         else:
-            print("Mutacja osobnika %s: %s" % (i, pokolenie_rodzicow[i]))
+            print("Mutacja osobnika %s: \t %s" % (i, pokolenie_rodzicow[i]))
             pokolenie_dzieci.append(f_Mutagen(pokolenie_rodzicow[i], 1))
 
 # pokolenie_dzieci = f_CMC(pokolenie_rodzicow)
@@ -264,6 +277,7 @@ canvas = FigureCanvasTkAgg(fig, master=root)  # A tk.DrawingArea.
 canvas.draw()
 
 root.mainloop()
+root.destroy()
      
      
      
