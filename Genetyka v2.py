@@ -165,13 +165,13 @@ def f_Pokolenie(pula):
     for i in (range(pop_size)):
         operacja = rand.random() # tutaj losujemy operację na pokoleniu rodzicow: krzyzowanie, mutacja czy kopiowanie
         if operacja>(Pc+Pm):
-            print("Kopiowanie")
+            print("Kopiowanie osobnika %s" % i)
             pokolenie_dzieci.append(pokolenie_rodzicow[i])
         elif operacja > Pm:
-            print("Krzyżowanie")
+            print("Krzyżowanie osobnika %s" % i)
             pokolenie_dzieci.append(pokolenie_rodzicow[i])
         else:
-            print("Mutacja")
+            print("Mutacja osobnika %s" % i)
             pokolenie_dzieci.append(pokolenie_rodzicow[i])
             
     
