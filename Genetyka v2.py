@@ -163,7 +163,7 @@ def f_Pokolenie(pula):
     
     pokolenie_dzieci=list()
     for i in (range(pop_size)):
-        operacja = rand.random() # tutaj losujemy operację na pokoleniu rodzicow: krzyzowanie, mutacja czy kopiowanie
+        operacja = rand.random() # tutaj losujemy operację na pokoleniu rodzicow: krzyzowanie lub mutacja lub kopiowanie (wg wytycznych wykładowych)
         if operacja>(Pc+Pm):
             print("Kopiowanie osobnika %s" % i)
             pokolenie_dzieci.append(pokolenie_rodzicow[i])
@@ -220,7 +220,7 @@ def form_button():
     
     the_chosen_one = max(f_Ewaluacja(ostatnie_pokolenie))
     form_max_value.set(the_chosen_one)
-    print("guru is happy")
+    print("Guru is happy!")
     #print(*wartosc_srednia_ew)
 
     
