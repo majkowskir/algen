@@ -20,13 +20,13 @@ from tkinter import *
 iteracja = 0 # wartość startowa, warunek dla iteracja = Gen
 
 # Parametry początkowe programu: liczba pokoleń (Gen), liczba zmiennych w funkcji (k), przedział (Xmin, Xmax), dokładność (d)
-Gen = 150
+Gen = 50
 
 # pop_size - liczebność populacji, dobrze, aby była parzysta
-pop_size = 300
+pop_size = 150
 
 # prawdopodobieństwa: krzyżowania (Pc) oraz mutacji (Pm)
-Pc = 0.5
+Pc = 0.25
 Pm = 0.01
 
 # Funkcja celu jest funkcją jednej zmiennej (k), nie jest używana w tej wersji programu
@@ -68,8 +68,9 @@ class Osobnik:
 
 	def mutacja(self):
 		pozycja_mutacji = rand.randint(0, m-1)
-		self.chromosom[pozycja_mutacji] = abs(self.chromosom[pozycja_mutacji]-1)
-		return (self.chromosom, pozycja_mutacji)
+		mutant = abs(self.chromosom[pozycja_mutacji]-1)
+		#return (mutant, pozycja_mutacji)
+		return (mutant)
 
 	def kopiowanie(self):
 		return self.chromosom
@@ -144,14 +145,16 @@ class Populacja:
 		return(F)
 
 	def operacje(self, pula):
+		potomstwo = []
 		for i in range(pop_size):
 			operacja = rand.random()
 			if operacja > (Pc+Pm):
-				self.stado[i].kopiowanie()
+				potomstwo.append(self.stado[i].kopiowanie())
 			elif operacja > Pm:
-				self.stado[i].crossover(pula)
+				potomstwo.append(self.stado[i].crossover(pula))
 			else:
-				self.stado[i].mutacja()
+				potomstwo.append(self.stado[i].mutacja())
+		print(*potomstwo, sep="\n")
 		return("ok")
 
 
