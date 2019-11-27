@@ -19,17 +19,7 @@ from tkinter import *
 # uwaga 2: reguła ruletki nie dopuszcza ujemnych wartości funkcji celu; znamy orientacyjne wartości w interesującyjm przedziale,
 # dlatego "podnosimy" wartość o bezpieczne 7
 
-shift = 7 # przesunięcie wartości funkcji w osi Y
 iteracja = 0 # wartość startowa, warunek dla iteracja = Gen
-
-def funkcja(argument):
-    try:
-        y = (math.exp(argument) * math.sin(10*math.pi*argument)+1)/argument
-        # y = math.sin(argument) # testowa funkcja kontrolna, w testowym zakresie max=1
-    except:
-        print("UWAGA! Błąd obliczania wartości funkcji dla argumentu x = %s" % argument) 
-        y = 0
-    return(y+shift)
 
 # Parametry początkowe programu: liczba pokoleń (Gen), liczba zmiennych w funkcji (k), przedział (Xmin, Xmax), dokładność (d)
 Gen = 25
@@ -50,7 +40,7 @@ Xmin = 0.5
 Xmax = 2.5
 
 # dokładność: 3 miejsca po kropce dziesiętnej
-d = 2
+d = 3
 
 # obliczamy, ile wartości musimy zakodować binarnie: mi
 mi = ((Xmax-Xmin)*10**d)+1
@@ -65,11 +55,10 @@ print("Dla zadanej dokładności i przedziału niezbędne jest zakodowanie minim
 def funkcja(argument):
     try:
         y = (math.exp(argument) * math.sin(10*math.pi*argument)+1)/argument
-        # y = math.sin(argument) # testowa funkcja kontrolna, w testowym zakresie max=1
     except:
         print("UWAGA! Błąd obliczania wartości funkcji dla argumentu x = %s" % argument) 
         y = 0
-    return(y+shift)
+    return(y)
 
 class Osobnik:
 
@@ -107,50 +96,49 @@ class Populacja:
 
 	def ewaluacja(self):
 	    wartosci_f = [] # usunięcie danych z listy do przechowywania wartosci funkcji dla danego pokolenia
-	    argumenty_f = []
 	    for i in range(pop_size):
 	        my_lst = self.stado[i].chromosom
 	        str1=""
 	        str1 = "".join(map(str, my_lst)) # łączenie elementów listy w string
 	        dekodowanie2dec = int(str1, 2) # dekodowanie binarki do liczby dziesiętnej 
 	        argument = ((Xmax-Xmin)*dekodowanie2dec)/((2**m)-1)+Xmin # mapowanie chromosomu do wartości x z zakresu (Xmin,Xmax)
-	        # argumenty_f.append(argument)
-	        wartosc = funkcja(argument)-shift # wartość funkcji w punkcie x 
-	        #wartosci_f.append(wartosc) # dodanie wartości do listy
 
+	        wartosc = funkcja(argument) # wartość funkcji w punkcie x 
+	        if wartosc < 0: wartosc = 0 # zapewniamy dla ruletki wartości dodatnie przez wyzerowanie ujemnych
+
+	        #wartosci_f.append([round(argument,d), round(wartosc,d)])
 	        wartosci_f.append([argument, wartosc])
-	        #F = sum(wartosci_f) # obliczamy dopasowanie całej populacji (F)
 	    return(wartosci_f)
+	
+	def ruletka(self):
+		ewal =  self.ewaluacja()
+		F = [sum(i) for i in zip(*ewal)] # https://www.geeksforgeeks.org/python-position-summation-in-list-of-tuples/
+		F = F[1] # suma wszystkich wartości funkcji w stadzie
 
+		Ps=[]
+		for i in (self.stado):
+			Ps.append(1/F)
+		return(Ps)
 
+		
 
-A = Populacja(pop_size)
+		
 
-for i in range(pop_size):
-	print(A.stado[i].chromosom)
-	#print(A.stado[i].mutacja())
+A = Populacja(pop_size) # utwowrzenie stada A
 
-e = A.ewaluacja()
+# wypisanie osobników w stadzie A
+# for i in range(pop_size):
+# 	print(A.stado[i].chromosom)
+	
+# ewaluacja stada A
+e = A.ewaluacja() 
+
+#e = A.ruletka() 
+
 
 print(*e, sep="\n")
 
-# Populacja=[]
-
-# for i in range(pop_size):
-#     Populacja.append(Osobnik())
-
-# print("Pokolenie zero: \n")
-# for obj in Populacja:
-# 	print(obj.chromosom)
+print([x[1] for x in e], sep="\n")
 
 
-# Populacja[0].mutacja()
-# print("Po mutacji \n")
-# for obj in Populacja:
-# 	print(obj.chromosom)
-
-# Populacja[0].crossover()
-# print("Po krzyzowaniu \n")
-# for obj in Populacja:
-# 	print(obj.chromosom)
 
