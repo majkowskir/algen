@@ -22,9 +22,6 @@ from tkinter import *
 shift = 7 # przesunięcie wartości funkcji w osi Y
 iteracja = 0 # wartość startowa, warunek dla iteracja = Gen
 
-shift = 7 # przesunięcie wartości funkcji w osi Y
-iteracja = 0 # wartość startowa, warunek dla iteracja = Gen
-
 def funkcja(argument):
     try:
         y = (math.exp(argument) * math.sin(10*math.pi*argument)+1)/argument
@@ -38,7 +35,7 @@ def funkcja(argument):
 Gen = 25
 
 # pop_size - liczebność populacji, dobrze, aby była parzysta
-pop_size = 3
+pop_size = 30
 
 # prawdopodobieństwa: krzyżowania (Pc) oraz mutacji (Pm)
 Pc = 0.75
@@ -65,16 +62,18 @@ m = math.ceil(math.log(mi,2))
 
 print("Dla zadanej dokładności i przedziału niezbędne jest zakodowanie minimum %s wartości, użyjemy do tego %s bitów." % (mi, m))
 
-
-# obsadzamy pierwszą populację (pop_size) losowymi wartościami 0/1 wg wyliczonej liczby bitów; pomiędzy chromosoamami nie unikamy powtórzeń
-def f_Pokolenie_zero(f_pop_size, f_m, output=False):
-    pokolenie_zero = np.random.choice(a=[0, 1], size=(f_pop_size, f_m)) # macierz o rozmiarach: populacja x bitowość, losowo 0/1
-    if output: print(*pokolenie_zero, sep = "\n")
-    print("Wygenerowano losową populację %s osobników, długość chromosomu: %s." % (f_pop_size, f_m))
-    return(pokolenie_zero)
+def funkcja(argument):
+    try:
+        y = (math.exp(argument) * math.sin(10*math.pi*argument)+1)/argument
+        # y = math.sin(argument) # testowa funkcja kontrolna, w testowym zakresie max=1
+    except:
+        print("UWAGA! Błąd obliczania wartości funkcji dla argumentu x = %s" % argument) 
+        y = 0
+    return(y+shift)
 
 class Osobnik:
 
+	# obsadzamy pierwszą populację (pop_size) losowymi wartościami 0/1 wg wyliczonej liczby bitów; pomiędzy chromosoamami nie unikamy powtórzeń
 	def __init__(self):
 		v_chromosom = np.random.choice(a=[0, 1], size=m)
 		self.chromosom = v_chromosom
@@ -101,26 +100,57 @@ class Osobnik:
 
 class Populacja:
 
-	def __init__(self):
-		
+	def __init__(self, liczebnosc_stada):
+		self.stado = []
+		for i in range(liczebnosc_stada):
+			self.stado.append(Osobnik())
 
-Populacja=[]
+	def ewaluacja(self):
+	    wartosci_f = [] # usunięcie danych z listy do przechowywania wartosci funkcji dla danego pokolenia
+	    argumenty_f = []
+	    for i in range(pop_size):
+	        my_lst = self.stado[i].chromosom
+	        str1=""
+	        str1 = "".join(map(str, my_lst)) # łączenie elementów listy w string
+	        dekodowanie2dec = int(str1, 2) # dekodowanie binarki do liczby dziesiętnej 
+	        argument = ((Xmax-Xmin)*dekodowanie2dec)/((2**m)-1)+Xmin # mapowanie chromosomu do wartości x z zakresu (Xmin,Xmax)
+	        # argumenty_f.append(argument)
+	        wartosc = funkcja(argument)-shift # wartość funkcji w punkcie x 
+	        #wartosci_f.append(wartosc) # dodanie wartości do listy
+
+	        wartosci_f.append([argument, wartosc])
+	        #F = sum(wartosci_f) # obliczamy dopasowanie całej populacji (F)
+	    return(wartosci_f)
+
+
+
+A = Populacja(pop_size)
 
 for i in range(pop_size):
-    Populacja.append(Osobnik())
+	print(A.stado[i].chromosom)
+	#print(A.stado[i].mutacja())
 
-print("Pokolenie zero: \n")
-for obj in Populacja:
-	print(obj.chromosom)
+e = A.ewaluacja()
+
+print(*e, sep="\n")
+
+# Populacja=[]
+
+# for i in range(pop_size):
+#     Populacja.append(Osobnik())
+
+# print("Pokolenie zero: \n")
+# for obj in Populacja:
+# 	print(obj.chromosom)
 
 
-Populacja[0].mutacja()
-print("Po mutacji \n")
-for obj in Populacja:
-	print(obj.chromosom)
+# Populacja[0].mutacja()
+# print("Po mutacji \n")
+# for obj in Populacja:
+# 	print(obj.chromosom)
 
-Populacja[0].crossover()
-print("Po krzyzowaniu \n")
-for obj in Populacja:
-	print(obj.chromosom)
+# Populacja[0].crossover()
+# print("Po krzyzowaniu \n")
+# for obj in Populacja:
+# 	print(obj.chromosom)
 
