@@ -20,14 +20,14 @@ from tkinter import *
 iteracja = 0 # wartość startowa, warunek dla iteracja = Gen
 
 # Parametry początkowe programu: liczba pokoleń (Gen), liczba zmiennych w funkcji (k), przedział (Xmin, Xmax), dokładność (d)
-Gen = 50
+Gen = 150
 
 # pop_size - liczebność populacji, dobrze, aby była parzysta
-pop_size = 150
+pop_size = 300
 
 # prawdopodobieństwa: krzyżowania (Pc) oraz mutacji (Pm)
-Pc = 0.75
-Pm = 0.1
+Pc = 0.5
+Pm = 0.01
 
 # Funkcja celu jest funkcją jednej zmiennej (k), nie jest używana w tej wersji programu
 k = 1
@@ -53,6 +53,7 @@ print("Dla zadanej dokładności i przedziału niezbędne jest zakodowanie minim
 def funkcja(argument):
     try:
         y = (math.exp(argument) * math.sin(10*math.pi*argument)+1)/argument
+        #y = math.sin(argument)
     except:
         print("UWAGA! Błąd obliczania wartości funkcji dla argumentu x = %s" % argument) 
         y = 0
@@ -80,9 +81,9 @@ class Osobnik:
 		parent_2 = pula.stado[rodzic_2].chromosom
 		dziecko_1 = np.concatenate((self.chromosom[:punkt_krzyzowania], parent_2[punkt_krzyzowania:]), axis=None)   
 		dziecko_2 = np.concatenate((parent_2[:punkt_krzyzowania], self.chromosom[punkt_krzyzowania:]), axis=None)
+
 		self.chromosom = dziecko_1
-		
-		pula.stado[rodzic_2].chromosom = dziecko_2
+		#pula.stado[rodzic_2].chromosom = dziecko_2
 		#return (self.chromosom, parent_2, punkt_krzyzowania, dziecko_1, dziecko_2) # lista dla dwóch zwracanych wartości
 		return (dziecko_1, dziecko_2)
 		
@@ -120,7 +121,7 @@ class Populacja:
 			for x in ewal:
 				Ps.append(x[1]/F)
 		except:
-			print("Suma prawdopodobieństw wynosi zero!")
+			print("sometink went wronk: np. suma prawdopodobieństw wynosi zero?!?")
 
 		sektor = 0
 		kolo_ruletki = []
@@ -140,7 +141,7 @@ class Populacja:
 		# nadpisanie stada pulą rodzicielską
 		for i in (range(len(pula_rodzicielska))):
 			self.stado[i].chromosom = pula_rodzicielska[i]
-		return()
+		return(F)
 
 	def operacje(self, pula):
 		for i in range(pop_size):
@@ -153,6 +154,8 @@ class Populacja:
 				self.stado[i].mutacja()
 		return("ok")
 
+
+
 Stado_Alfa = Populacja(pop_size) # utworzenie stada A
 
 # wypisanie osobników w stadzie A
@@ -162,11 +165,13 @@ for i in range(pop_size):
 for iteracja in range(Gen):
 	Stado_Alfa.ewaluacja()
 	Stado_Alfa.ruletka()
+	print(round(Stado_Alfa.ruletka()/pop_size,d))
 	Stado_Alfa.operacje(Stado_Alfa)
 
 
-print("Po x iteracjach")
-for i in range(pop_size):
-	print(Stado_Alfa.stado[i].chromosom)
+# print("Po x iteracjach")
+# for i in range(pop_size):
+# 	print(Stado_Alfa.stado[i].chromosom)
 
-print(*Stado_Alfa.ewaluacja(), sep="\n")
+#print(*Stado_Alfa.ewaluacja(), sep="\n")
+#print(*wartosci_funkcji_do_wykresu, sep="\n")
