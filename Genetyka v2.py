@@ -179,11 +179,9 @@ def f_Pokolenie(pula, output = False):
     
     pokolenie_dzieci=list()
     
-    
     numeracja = iter(range(pop_size)) # iterator niezbędny do operacji wewnątrz pętli
 
     for i in numeracja:
-        print(i)
         operacja = rand.random() # tutaj losujemy operację na pokoleniu rodzicow: krzyzowanie lub mutacja lub kopiowanie (wg wytycznych wykładowych)
         if operacja > (Pc+Pm):
             if output: print("Kopiowanie osobnika %s" % i)
@@ -213,7 +211,6 @@ def f_Pokolenie(pula, output = False):
     else:
         return(f_Pokolenie(pokolenie_dzieci))
  
-
 def form_button():
     global pop_size, Gen, m, Pc, Pm
     global iteracja, wartosc_srednia_ew
@@ -225,7 +222,8 @@ def form_button():
     Pm = form_Pmutation.get()
 
     iteracja = 0
-    wartosc_srednia_ew=[]
+    wartosc_srednia_ew=list()
+    pierwsze_pokolenie=list()
 
     if (Pc+Pm)<=1:
         print("Wartości uruchomieniowe: Pop: %s, Gen: %s, Pc: %s, Pm: %s, Wart_srednia: %s" % (pop_size, Gen, Pc, Pm, wartosc_srednia_ew))
@@ -242,7 +240,8 @@ def form_button():
         
         the_chosen_one = max(f_Ewaluacja(ostatnie_pokolenie))
         form_max_value.set(the_chosen_one)
-
+        form_duration.set(str(end-start)+" sekund")
+        
         print("Wartości wyjsciowe: Pop: %s, Gen: %s, Pc: %s, Pm: %s, Wart_srednia: %s" % (pop_size, Gen, Pc, Pm, wartosc_srednia_ew))
         print("Guru is happy!")
         #print(*wartosc_srednia_ew)
@@ -279,6 +278,10 @@ tk.Button(text="Uruchom", command = form_button).grid(row=0, column=4, padx=10, 
 form_max_value = DoubleVar() # testowa kontrolka dla dowolnej wartości
 form_max_value.set(0)
 tk.Label(root, textvariable=form_max_value, bg="white").grid(row=2, column=0, padx=10, sticky=tk.W)
+
+form_duration = DoubleVar() 
+form_duration.set(0)
+tk.Label(root, textvariable=form_duration, bg="white").grid(row=3, column=0, padx=10, sticky=tk.W)
 
 # wykres.create_text(200, 20,fill="darkblue",font="Times 12 italic bold", tex = vtext)
 # wykres.create_line(0, 0, 200, 100)
