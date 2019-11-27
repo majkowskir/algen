@@ -20,10 +20,10 @@ from tkinter import *
 iteracja = 0 # wartość startowa, warunek dla iteracja = Gen
 
 # Parametry początkowe programu: liczba pokoleń (Gen), liczba zmiennych w funkcji (k), przedział (Xmin, Xmax), dokładność (d)
-Gen = 25
+Gen = 50
 
 # pop_size - liczebność populacji, dobrze, aby była parzysta
-pop_size =5 
+pop_size = 150
 
 # prawdopodobieństwa: krzyżowania (Pc) oraz mutacji (Pm)
 Pc = 0.75
@@ -38,7 +38,7 @@ Xmin = 0.5
 Xmax = 2.5
 
 # dokładność: 3 miejsca po kropce dziesiętnej
-d = 2
+d = 3
 
 # obliczamy, ile wartości musimy zakodować binarnie: mi
 mi = ((Xmax-Xmin)*10**d)+1
@@ -73,17 +73,19 @@ class Osobnik:
 	def kopiowanie(self):
 		return self.chromosom
 
-	def crossover(self):
+	def crossover(self, pula):
 		punkt_krzyzowania = rand.randint(1, m-2) # punkt krzyżowania, przecięcie chromosomu najwcześniej za pierwszym bitem, najpóźniej za przedostatnim
-		partnerka = rand.randint(0, pop_size-1)
-		parent_2 = Populacja[partnerka].chromosom
+		rodzic_2 = rand.randint(0, pop_size-1)
+	
+		parent_2 = pula.stado[rodzic_2].chromosom
 		dziecko_1 = np.concatenate((self.chromosom[:punkt_krzyzowania], parent_2[punkt_krzyzowania:]), axis=None)   
 		dziecko_2 = np.concatenate((parent_2[:punkt_krzyzowania], self.chromosom[punkt_krzyzowania:]), axis=None)
-
 		self.chromosom = dziecko_1
-		Populacja[partnerka].chromosom = dziecko_2
+		
+		pula.stado[rodzic_2].chromosom = dziecko_2
 		#return (self.chromosom, parent_2, punkt_krzyzowania, dziecko_1, dziecko_2) # lista dla dwóch zwracanych wartości
 		return (dziecko_1, dziecko_2)
+		
 
 class Populacja:
 
@@ -140,42 +142,31 @@ class Populacja:
 			self.stado[i].chromosom = pula_rodzicielska[i]
 		return()
 
+	def operacje(self, pula):
+		for i in range(pop_size):
+			operacja = rand.random()
+			if operacja > (Pc+Pm):
+				self.stado[i].kopiowanie()
+			elif operacja > Pm:
+				self.stado[i].crossover(pula)
+			else:
+				self.stado[i].mutacja()
+		return("ok")
 
 Stado_Alfa = Populacja(pop_size) # utworzenie stada A
 
+# wypisanie osobników w stadzie A
+for i in range(pop_size):
+	print(Stado_Alfa.stado[i].chromosom)
 
-# Gen_1 = Stado_Alfa.ewaluacja()
-# Stado_Alfa.ruletka()
-# Gen_2 = Stado_Alfa.ewaluacja()
-# Stado_Alfa.ruletka()
-# Gen_3 = Stado_Alfa.ewaluacja()
-
-# #print(*Gen_1)
-# print([sum(i) for i in zip(*Gen_1)])
-
-# #print(*Gen_2)
-# print([sum(i) for i in zip(*Gen_2)])
-
-# #print(*Gen_2)
-# print([sum(i) for i in zip(*Gen_3)])
+for iteracja in range(Gen):
+	Stado_Alfa.ewaluacja()
+	Stado_Alfa.ruletka()
+	Stado_Alfa.operacje(Stado_Alfa)
 
 
-# # ewaluacja stada Alfa
-# e = Alfa.ewaluacja() 
+print("Po x iteracjach")
+for i in range(pop_size):
+	print(Stado_Alfa.stado[i].chromosom)
 
-# # wypisanie osobników w stadzie A
-# for i in range(pop_size):
-# 	print(Alfa.stado[i].chromosom)
-# 	#print(*e[i], sep="\n")
-
-# print("Ruletka:")
-# ruletka = Alfa.ruletka()
-# print(*ruletka, sep="\n")
-# print("i po Ruletka:")
-# # wypisanie osobników w stadzie A
-
-# e = Alfa.ewaluacja() 
-
-# for i in range(pop_size):
-# 	print(Alfa.stado[i].chromosom)
-# 	#print(*e[i], sep="\n")
+print(*Stado_Alfa.ewaluacja(), sep="\n")
