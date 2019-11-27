@@ -12,8 +12,6 @@ from collections import Counter
 import tkinter as tk
 from tkinter import *
 
-
-
 # funckja przystosowania, wpisana zgodnie z warunkami zadania laboratoryjnego
 # uwaga 1: dziedzina funkcji wyklucza zero
 # uwaga 2: reguła ruletki nie dopuszcza ujemnych wartości funkcji celu; znamy orientacyjne wartości w interesującyjm przedziale,
@@ -25,7 +23,7 @@ iteracja = 0 # wartość startowa, warunek dla iteracja = Gen
 Gen = 25
 
 # pop_size - liczebność populacji, dobrze, aby była parzysta
-pop_size = 30
+pop_size =5 
 
 # prawdopodobieństwa: krzyżowania (Pc) oraz mutacji (Pm)
 Pc = 0.75
@@ -40,7 +38,7 @@ Xmin = 0.5
 Xmax = 2.5
 
 # dokładność: 3 miejsca po kropce dziesiętnej
-d = 3
+d = 2
 
 # obliczamy, ile wartości musimy zakodować binarnie: mi
 mi = ((Xmax-Xmin)*10**d)+1
@@ -115,30 +113,69 @@ class Populacja:
 		F = [sum(i) for i in zip(*ewal)] # https://www.geeksforgeeks.org/python-position-summation-in-list-of-tuples/
 		F = F[1] # suma wszystkich wartości funkcji w stadzie
 
-		Ps=[]
-		for i in (self.stado):
-			Ps.append(1/F)
-		return(Ps)
+		Ps=[] # prawdopodobieństwa poszczególnych osobników, im większa wartość tym "więcej miejsca na kole"
+		try:
+			for x in ewal:
+				Ps.append(x[1]/F)
+		except:
+			print("Suma prawdopodobieństw wynosi zero!")
 
+		sektor = 0
+		kolo_ruletki = []
+		for i in range(pop_size):
+			sektor = sektor + Ps[i]
+			kolo_ruletki.append(sektor) # dodawanie do listy wartości brzegowej sektora
+
+		pula_rodzicielska = []
+		for i in range(pop_size): 
+			losowa = rand.random() # losujemy liczbę z przedziału (0,1) tyle razy, ile osobników w populacji
+			sektor = 0 # zaczynamy od sektora zero
+			for j in range(len(kolo_ruletki)): # sprawdzamy, do którego sektora na kole ruletki wpadła wylosowana liczba
+				if losowa > kolo_ruletki[j]:
+					sektor=sektor+1
+			pula_rodzicielska.append(self.stado[sektor].chromosom) # do puli rodzicielskiej dodajemy osobnika z puli zero
 		
+		# nadpisanie stada pulą rodzicielską
+		for i in (range(len(pula_rodzicielska))):
+			self.stado[i].chromosom = pula_rodzicielska[i]
+		return()
 
-		
 
-A = Populacja(pop_size) # utwowrzenie stada A
+Stado_Alfa = Populacja(pop_size) # utworzenie stada A
 
-# wypisanie osobników w stadzie A
+
+# Gen_1 = Stado_Alfa.ewaluacja()
+# Stado_Alfa.ruletka()
+# Gen_2 = Stado_Alfa.ewaluacja()
+# Stado_Alfa.ruletka()
+# Gen_3 = Stado_Alfa.ewaluacja()
+
+# #print(*Gen_1)
+# print([sum(i) for i in zip(*Gen_1)])
+
+# #print(*Gen_2)
+# print([sum(i) for i in zip(*Gen_2)])
+
+# #print(*Gen_2)
+# print([sum(i) for i in zip(*Gen_3)])
+
+
+# # ewaluacja stada Alfa
+# e = Alfa.ewaluacja() 
+
+# # wypisanie osobników w stadzie A
 # for i in range(pop_size):
-# 	print(A.stado[i].chromosom)
-	
-# ewaluacja stada A
-e = A.ewaluacja() 
+# 	print(Alfa.stado[i].chromosom)
+# 	#print(*e[i], sep="\n")
 
-#e = A.ruletka() 
+# print("Ruletka:")
+# ruletka = Alfa.ruletka()
+# print(*ruletka, sep="\n")
+# print("i po Ruletka:")
+# # wypisanie osobników w stadzie A
 
+# e = Alfa.ewaluacja() 
 
-print(*e, sep="\n")
-
-print([x[1] for x in e], sep="\n")
-
-
-
+# for i in range(pop_size):
+# 	print(Alfa.stado[i].chromosom)
+# 	#print(*e[i], sep="\n")
