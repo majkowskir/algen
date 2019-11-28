@@ -27,10 +27,9 @@ Gen = 50
 
 # pop_size - liczebność populacji, dobrze, aby była parzysta
 pop_size = 150
-
 # prawdopodobieństwa: krzyżowania (Pc) oraz mutacji (Pm)
-Pc = 0.25
-Pm = 0.01
+Pc = 0.5
+Pm = 0.1
 
 # Funkcja celu jest funkcją jednej zmiennej (k), nie jest używana w tej wersji programu
 k = 1
@@ -51,7 +50,7 @@ mi = ((Xmax-Xmin)*10**d)+1
 # uwaga: badamy funkcję jednej zmiennej (k=1), program nie przewiduje wielu zmiennych!
 m = math.ceil(math.log(mi,2)) 
 
-print("Dla zadanej dokładności i przedziału niezbędne jest zakodowanie minimum %s wartości, użyjemy do tego %s bitów." % (mi, m))
+print("\nDla zadanej dokładności i przedziału \nniezbędne jest zakodowanie minimum %s wartości,\nużyjemy do tego %s bitów.\n" % (mi, m))
 
 def funkcja(argument):
     try:
@@ -63,46 +62,32 @@ def funkcja(argument):
     return(y)
 
 class Osobnik:
-
 	# obsadzamy pierwszą populację (pop_size) losowymi wartościami 0/1 wg wyliczonej liczby bitów; pomiędzy chromosoamami nie unikamy powtórzeń
 	def __init__(self):
 		v_chromosom = np.random.choice(a=[0, 1], size=m)
 		self.chromosom = v_chromosom
 
-	def mutacja(self, rodzic_1):
-		pass
-
-	def kopiowanie(self):
-		pass
-		#return self.chromosom
-
 	def crossover(self, rodzic_1, rodzic_2):
 		punkt_krzyzowania = rand.randint(1, m-2) # punkt krzyżowania, przecięcie chromosomu najwcześniej za pierwszym bitem, najpóźniej za przedostatnim
-		
-		#print("Rodzic 1: %s" % rodzic_1)
-		#print("Rodzic 2: %s" % rodzic_2)
-		# print("Punkt krzyzowania: %s" % punkt_krzyzowania)
-
 		try:
 			dziecko_1 = np.concatenate((rodzic_1[:punkt_krzyzowania], rodzic_2[punkt_krzyzowania:]), axis=None)   
 			dziecko_2 = np.concatenate((rodzic_2[:punkt_krzyzowania], rodzic_1[punkt_krzyzowania:]), axis=None)
 		except:
 			print("blad krzyzowania")
-		# print("Dziecko 1: %s" % dziecko_1)
-		# print("Dziecko 2: %s" % dziecko_2)
 		return (dziecko_1, dziecko_2)
-		
+
 
 class Populacja:
-
+	
 	def __init__(self, liczebnosc_stada):
 		self.stado = []
 		for i in range(liczebnosc_stada):
 			self.stado.append(Osobnik())
 
+	# metoda oblicza wartości funkcji dla danej populacji przedstawionej w postaci binarnej
 	def ewaluacja(self):
 	    wartosci_f = [] # usunięcie danych z listy do przechowywania wartosci funkcji dla danego pokolenia
-	    for i in range(pop_size):
+	    for i in range(len(self.stado)):
 	        my_lst = self.stado[i].chromosom
         	str1=""
 	       	str1 = "".join(map(str, my_lst)) # łączenie elementów listy w string
@@ -110,8 +95,6 @@ class Populacja:
 	        argument = ((Xmax-Xmin)*dekodowanie2dec)/((2**m)-1)+Xmin # mapowanie chromosomu do wartości x z zakresu (Xmin,Xmax)
 	        wartosc = funkcja(argument) # wartość funkcji w punkcie x 
 	        if wartosc < 0: wartosc = 0 # zapewniamy dla ruletki wartości dodatnie przez wyzerowanie ujemnych
-
-	        #wartosci_f.append([round(argument,d), round(wartosc,d)])
 	        wartosci_f.append([argument, wartosc])
 	    return(wartosci_f)
 	
@@ -119,19 +102,19 @@ class Populacja:
 		ewal =  self.ewaluacja()
 		F = [sum(i) for i in zip(*ewal)] # https://www.geeksforgeeks.org/python-position-summation-in-list-of-tuples/
 		F = F[1] # suma wszystkich wartości funkcji w stadzie
-
 		Ps=[] # prawdopodobieństwa poszczególnych osobników, im większa wartość tym "więcej miejsca na kole"
 		try:
 			for x in ewal:
 				Ps.append(x[1]/F)
 		except:
-			print("sometink went wronk: np. suma prawdopodobieństw wynosi zero?!?")
+			print("suma prawdopodobieństw wynosi zero?!?")
 
 		sektor = 0
 		kolo_ruletki = []
 		for i in range(len(Ps)):
 			sektor = sektor + Ps[i]
-			kolo_ruletki.append(sektor) # dodawanie do listy wartości brzegowej sektora
+			kolo_ruletki.append(sektor) # dodawanie wartości brzegowej sektora do listy
+
 
 		losowa = rand.uniform(0,(kolo_ruletki[len(kolo_ruletki)-1])) # losujemy liczbę z przedziału (0, 1 lub czasami do 0,99999999 ) 
 		sektor = 0 # zaczynamy od sektora zero
@@ -146,34 +129,34 @@ class Populacja:
 
 		for i in iteracja:
 			operacja = rand.random()
+			
+			# KOPIOWANIE
 			if operacja > (Pc+Pm):
 				try:
 					potomstwo.append(self.ruletka())
-				#	print(i, "\tIteracja operacyjna: kopiowanie")
 				except:
 					print("Błąd kopiowania!")
+			
+			# KRZYZOWANIE
 			elif operacja > Pm:
 				rodzic_1 = self.ruletka()
 				rodzic_2 = self.ruletka()
 				dzieci = self.stado[i].crossover(rodzic_1, rodzic_2)
+				
 				try:
 					next(iteracja)
-					potomstwo.append(dzieci[0]) # tu jest brzydko, bo na twardo, powinna być jakaś pętla
+					potomstwo.append(dzieci[0]) # tu jest brzydko, bo na twardo
 					potomstwo.append(dzieci[1])
 				except:
 					potomstwo.append(dzieci[0]) # jeśli krzyzujemy ostatniego osobnika w puli, propagowane jest tylko jedno dziecko
-				#print(i, "\tIteracja operacyjna: krzyżowanie")
+			
+			# MUTACJA
 			else:
-				#print("mutowanie \n")
 				pozycja_mutacji = rand.randint(0, m-1)
 				rodzic_1 = self.ruletka()
-				#print("Rodzic 1:", rodzic_1)
-				#print("Pozycja mutacji: ", pozycja_mutacji)
 				rodzic_1[pozycja_mutacji]=abs(rodzic_1[pozycja_mutacji]-1)
 				mutant = rodzic_1
 				potomstwo.append(mutant)
-				#print(i, "\tIteracja operacyjna: mutacja")
-
 
 		# przepisanie stada rodzicielskiego na potomne:
 		for i in (range(len(potomstwo))): 
@@ -185,13 +168,19 @@ class Populacja:
 Stado_Alfa = Populacja(pop_size) # utworzenie stada A
 
 # wypisanie osobników w stadzie A
-# for i in range(pop_size):
-# 	print(Stado_Alfa.stado[i].chromosom)
+#for i in range(pop_size):
+#	print(Stado_Alfa.stado[i].chromosom)
 
-for iteracja in range(Gen):
-	Stado_Alfa.operacje()
+# GŁÓWNA PĘTLA PROGRAMU
+for iteracja in range(Gen):	
 	wartosci = Stado_Alfa.ewaluacja()
-	F = [sum(i) for i in zip(*wartosci)]
-	print("Pokolenie %s, stado: %s, średni_argument: %s" % (iteracja, len(Stado_Alfa.stado), (round(F[0]/len(Stado_Alfa.stado),d))),", średnia wartosc f(x) w pokoleniu: ",(round(F[1]/len(Stado_Alfa.stado),d)))
+	#print(*wartosci, sep="\n")
+	Stado_Alfa.operacje()
+	F = [sum(i) for i in zip(*wartosci)] # suma wartości funkcji jaką uzyskujemy ze wszystkich osobników w populacji
+	mean_X = (round(F[1]/len(Stado_Alfa.stado),d)) # średnia wartość funkcji w danym pokoleniu
+	print("Pokolenie %s, średni_argument: %s\t" % (("{0:0=2d}".format(iteracja)), (round(F[0]/len(Stado_Alfa.stado),d))),", średnia wartosc f(x) w pokoleniu: \t", mean_X)
+	
+max_X = round((max(wartosci, key=itemgetter(1))[0]),d)
+print("\nWartosc argumentu dającego maksymalną wartość funkcji w ostatnim pokoleniu: ", max_X)
+print("Wartość funkcji: ", round(funkcja(max_X),d))
 
-print(max(wartosci, key=itemgetter(1))[0])
