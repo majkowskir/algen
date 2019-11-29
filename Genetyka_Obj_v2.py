@@ -15,6 +15,8 @@ from operator import itemgetter
 import tkinter as tk
 from tkinter import *
 
+rand.seed() 
+
 # funckja przystosowania, wpisana zgodnie z warunkami zadania laboratoryjnego
 # uwaga 1: dziedzina funkcji wyklucza zero
 # uwaga 2: reguła ruletki nie dopuszcza ujemnych wartości funkcji celu; znamy orientacyjne wartości w interesującyjm przedziale,
@@ -28,8 +30,8 @@ Gen = 50
 # pop_size - liczebność populacji, dobrze, aby była parzysta
 pop_size = 150
 # prawdopodobieństwa: krzyżowania (Pc) oraz mutacji (Pm)
-Pc = 0.5
-Pm = 0.1
+Pc = 0.25
+Pm = 0.01
 
 # Funkcja celu jest funkcją jednej zmiennej (k), nie jest używana w tej wersji programu
 k = 1
@@ -51,6 +53,7 @@ mi = ((Xmax-Xmin)*10**d)+1
 m = math.ceil(math.log(mi,2)) 
 
 print("\nDla zadanej dokładności i przedziału \nniezbędne jest zakodowanie minimum %s wartości,\nużyjemy do tego %s bitów.\n" % (mi, m))
+print("Wartości uruchomieniowe:\nPopulacja: %s, Gen: %s, Pc: %s, Pm: %s\n" % (pop_size, Gen, Pc, Pm))
 
 def funkcja(argument):
     try:

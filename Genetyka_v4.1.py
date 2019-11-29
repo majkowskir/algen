@@ -194,6 +194,11 @@ def f_Pokolenie(pula, output = False):
 	mean_y = round(F[1]/len(pula),d)
 	wartosc_srednia_ew.append([mean_x, mean_y])
 
+	# print("Krotki w pokoleniu:", *ewaluacja_pokolenia, sep="\n")
+	# max_xy = list(map(max, zip(*ewaluacja_pokolenia)))
+	# #max_xy = ewaluacja_pokolenia[1].index("0")
+	# print("Maksymalna krotka w pokoleniu:", max_xy)
+
 	iteracja = iteracja + 1
 	
 	# rekurencja po zmiennej "iteracja" do zmiennej "Gen" - główna pętla programu
@@ -238,6 +243,12 @@ def form_button():
         ostatnie_pokolenie=f_Pokolenie(pierwsze_pokolenie)
         end = time.time()
         
+        
+
+        
+
+
+        form_max_value.set(10)
         form_duration.set("Czas: %s sekund"% round(end-start,3))
 
         #print("wartosc_srednia_ew ", *wartosc_srednia_ew, sep="\n")
