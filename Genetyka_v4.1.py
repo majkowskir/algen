@@ -39,18 +39,15 @@ def funkcja(argument):
         y = 0
     return(y+shift)
 
-# Parametry początkowe programu: liczba pokoleń (Gen), liczba zmiennych w funkcji (k), przedział (Xmin, Xmax), dokładność (d)
-Gen = 4
-
 # pop_size - liczebność populacji, dobrze, aby była parzysta
-pop_size = 8
+pop_size = 150
+
+# Parametry początkowe programu: liczba pokoleń (Gen), liczba zmiennych w funkcji (k), przedział (Xmin, Xmax), dokładność (d)
+Gen = 50
 
 # prawdopodobieństwa: krzyżowania (Pc) oraz mutacji (Pm)
-Pc = 0.75
-Pm = 0.1
-
-# Funkcja celu jest funkcją jednej zmiennej (k), nie jest używana w tej wersji programu
-k = 1
+Pc = 0.25
+Pm = 0.01
 
 # przedział w którym badamy funkcję (Xmin do Xmax)
 # uwaga: w zadaniu występują tylko wartości dodatnie, nie ma potrzeby przesuwania przedziału
@@ -191,8 +188,6 @@ def f_Pokolenie(pula, output = False):
 		else:
 			if output: print("Mutacja osobnika: \t %s" % (rodzic_1))
 			pokolenie_dzieci.append(f_Mutagen(f_Ruletka_osobnik(prawdopodobienstwo_sel, pula), False)) # pokolenie_dzieci = f_CMC(pokolenie_rodzicow)
-	#print("Liczebność pokolenia potomnego: %s" % len(pokolenie_dzieci))
-    #wartosc_srednia_ew.append(round((sum(ewaluacja_pokolenia)/pop_size),d)) #  przebieg średniej wartości funkcji dopasowania pokolenia w funkcji nr pokolenia
 	
 	F = [sum(i) for i in zip(*ewaluacja_pokolenia)]
 	mean_x = round(F[0]/len(pula),d)
@@ -203,9 +198,11 @@ def f_Pokolenie(pula, output = False):
 	
 	# rekurencja po zmiennej "iteracja" do zmiennej "Gen" - główna pętla programu
 	if iteracja >= Gen:
-		print("Przetworzono ostatnie pokolenie nr %s \n" % iteracja)
+		print("Przetworzono ostatnie pokolenie nr %s:" % iteracja)
+		print("Pokolenie %s, średni_argument: %s \t średnia wartosc f(x) w pokoleniu: %s"% (("{0:0=2d}".format(iteracja)), mean_x, mean_y))
 		return(pokolenie_dzieci)
 	else:
+		print("Pokolenie %s, średni_argument: %s \t średnia wartosc f(x) w pokoleniu: %s"% (("{0:0=2d}".format(iteracja)), mean_x, mean_y))
 		return(f_Pokolenie(pokolenie_dzieci))
 
 
@@ -236,15 +233,15 @@ def form_button():
         except:
             print("Nie utworzono Pokolenia Zero!")
 
+        print("guru meditating...")
         start = time.time()
         ostatnie_pokolenie=f_Pokolenie(pierwsze_pokolenie)
         end = time.time()
         
-        print("wartosc_srednia_ew ", *wartosc_srednia_ew, sep="\n")
-        
-        
-        print("Guru is happy!")
-        #print(*wartosc_srednia_ew)
+        form_duration.set("Czas: %s sekund"% round(end-start,3))
+
+        #print("wartosc_srednia_ew ", *wartosc_srednia_ew, sep="\n")
+        print("the end: guru's happy!")
     else:
         messagebox.showinfo("Błąd wprowadzonych wartości P", "Suma prawdopodobieństw krzyżowania i mutacji nie może przekroczyć 1")
 
