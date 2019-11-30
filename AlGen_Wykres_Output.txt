@@ -1,0 +1,56 @@
+Wartości uruchomieniowe: Pop: 20, Gen: 50, Pc: 0.5, Pm: 0.05
+Wygenerowano losową populację 20 osobników, długość chromosomu: 11.
+Utworzono Pokolenie Zero.
+guru meditating...
+Pokolenie 01,    średnia wartosc f(x) w pokoleniu: 2.443
+Pokolenie 02,    średnia wartosc f(x) w pokoleniu: 3.415
+Pokolenie 03,    średnia wartosc f(x) w pokoleniu: 3.804
+Pokolenie 04,    średnia wartosc f(x) w pokoleniu: 3.791
+Pokolenie 05,    średnia wartosc f(x) w pokoleniu: 3.971
+Pokolenie 06,    średnia wartosc f(x) w pokoleniu: 4.112
+Pokolenie 07,    średnia wartosc f(x) w pokoleniu: 4.315
+Pokolenie 08,    średnia wartosc f(x) w pokoleniu: 4.726
+Pokolenie 09,    średnia wartosc f(x) w pokoleniu: 4.841
+Pokolenie 10,    średnia wartosc f(x) w pokoleniu: 4.866
+Pokolenie 11,    średnia wartosc f(x) w pokoleniu: 4.875
+Pokolenie 12,    średnia wartosc f(x) w pokoleniu: 4.83
+Pokolenie 13,    średnia wartosc f(x) w pokoleniu: 4.763
+Pokolenie 14,    średnia wartosc f(x) w pokoleniu: 4.867
+Pokolenie 15,    średnia wartosc f(x) w pokoleniu: 4.858
+Pokolenie 16,    średnia wartosc f(x) w pokoleniu: 4.936
+Pokolenie 17,    średnia wartosc f(x) w pokoleniu: 4.921
+Pokolenie 18,    średnia wartosc f(x) w pokoleniu: 4.968
+Pokolenie 19,    średnia wartosc f(x) w pokoleniu: 5.002
+Pokolenie 20,    średnia wartosc f(x) w pokoleniu: 5.062
+Pokolenie 21,    średnia wartosc f(x) w pokoleniu: 5.058
+Pokolenie 22,    średnia wartosc f(x) w pokoleniu: 5.073
+Pokolenie 23,    średnia wartosc f(x) w pokoleniu: 5.037
+Pokolenie 24,    średnia wartosc f(x) w pokoleniu: 5.074
+Pokolenie 25,    średnia wartosc f(x) w pokoleniu: 5.077
+Pokolenie 26,    średnia wartosc f(x) w pokoleniu: 5.078
+Pokolenie 27,    średnia wartosc f(x) w pokoleniu: 5.075
+Pokolenie 28,    średnia wartosc f(x) w pokoleniu: 5.071
+Pokolenie 29,    średnia wartosc f(x) w pokoleniu: 5.113
+Pokolenie 30,    średnia wartosc f(x) w pokoleniu: 4.915
+Pokolenie 31,    średnia wartosc f(x) w pokoleniu: 5.113
+Pokolenie 32,    średnia wartosc f(x) w pokoleniu: 5.111
+Pokolenie 33,    średnia wartosc f(x) w pokoleniu: 5.111
+Pokolenie 34,    średnia wartosc f(x) w pokoleniu: 5.113
+Pokolenie 35,    średnia wartosc f(x) w pokoleniu: 5.116
+Pokolenie 36,    średnia wartosc f(x) w pokoleniu: 4.972
+Pokolenie 37,    średnia wartosc f(x) w pokoleniu: 4.974
+Pokolenie 38,    średnia wartosc f(x) w pokoleniu: 5.07
+Pokolenie 39,    średnia wartosc f(x) w pokoleniu: 4.924
+Pokolenie 40,    średnia wartosc f(x) w pokoleniu: 4.869
+Pokolenie 41,    średnia wartosc f(x) w pokoleniu: 4.899
+Pokolenie 42,    średnia wartosc f(x) w pokoleniu: 5.105
+Pokolenie 43,    średnia wartosc f(x) w pokoleniu: 5.104
+Pokolenie 44,    średnia wartosc f(x) w pokoleniu: 5.094
+Pokolenie 45,    średnia wartosc f(x) w pokoleniu: 5.095
+Pokolenie 46,    średnia wartosc f(x) w pokoleniu: 5.001
+Pokolenie 47,    średnia wartosc f(x) w pokoleniu: 5.023
+Pokolenie 48,    średnia wartosc f(x) w pokoleniu: 5.052
+Pokolenie 49,    średnia wartosc f(x) w pokoleniu: 5.053
+Przetworzono ostatnie pokolenie nr 50:
+Pokolenie 50,    średnia wartosc f(x) w pokoleniu: 5.103
+Maksymalna odnaleziona wartość funkci: 5.113 dla argumentu 2.447

@@ -8,6 +8,8 @@ import random as rand
 import matplotlib.pyplot as plt
 from collections import Counter
 
+from operator import itemgetter
+
 import tkinter as tk
 from tkinter import *
 
@@ -27,20 +29,20 @@ from matplotlib.figure import Figure
 # uwaga 2: reguła ruletki nie dopuszcza ujemnych wartości funkcji celu; znamy orientacyjne wartości w interesującyjm przedziale,
 # dlatego "podnosimy" wartość o bezpieczne 7
 
-shift = 0 # przesunięcie wartości funkcji w osi Y
+shift = 0 # początkowo używane przesunięcie wartości funkcji 
 iteracja = 0 # wartość startowa, warunek dla iteracja = Gen
 
 def funkcja(argument):
     try:
         y = (math.exp(argument) * math.sin(10*math.pi*argument)+1)/argument
-        # y = math.sin(argument) # testowa funkcja kontrolna, w testowym zakresie max=1
+        # y = -0.5*(argument**2)+(argument)+1
     except:
         print("UWAGA! Błąd obliczania wartości funkcji dla argumentu x = %s" % argument) 
         y = 0
     return(y+shift)
 
 # pop_size - liczebność populacji, dobrze, aby była parzysta
-pop_size = 150
+pop_size = 50
 
 # Parametry początkowe programu: liczba pokoleń (Gen), liczba zmiennych w funkcji (k), przedział (Xmin, Xmax), dokładność (d)
 Gen = 50
@@ -67,7 +69,6 @@ m = math.ceil(math.log(mi,2))
 
 print("Dla zadanej dokładności i przedziału niezbędne jest zakodowanie %s wartości, użyjemy do tego %s bitów." % (mi, m))
 
-
 # obsadzamy pierwszą populację o liczebności (pop_size) losowymi wartościami 0/1 wg wyliczonej liczby bitów; pomiędzy chromosoamami nie unikamy powtórzeń
 def f_Pokolenie_zero(f_pop_size, f_m, output=False):
     pokolenie_zero = np.random.choice(a=[0, 1], size=(f_pop_size, f_m)) # macierz o rozmiarach: populacja x bitowość, losowo 0/1
@@ -78,19 +79,20 @@ def f_Pokolenie_zero(f_pop_size, f_m, output=False):
 # Sprawdzamy dopasowanie danej populacji, obliczając wartość funkcji dla każdego chromosomu 
 # (po dekodowaniu dziesiętnym, dekodowanie2dec)
 def f_Ewaluacja(pula, output=False):
-    ewaluacja = list() # usunięcie danych z listy do przechowywania wartosci funkcji dla danego pokolenia
-    for i in range(pop_size):
+    ewaluacja = [] # usunięcie danych z listy do przechowywania wartosci funkcji dla danego pokolenia
+    for i in range(len(pula)):
         str1 = "".join(map(str, pula[i])) # łączenie elementów listy w string
-        #dekodowanie2dec = int(str1, 2) # dekodowanie binarki do liczby dziesiętnej 
-        argument = ((Xmax-Xmin)*(int(str1, 2)))/((2**m)-1)+Xmin # mapowanie chromosomu do wartości x z zakresu (Xmin,Xmax)
+
+        argument = ((Xmax-Xmin)*(int(str1, 2)))/((2**m)-1)+Xmin # dekodowanie bin2dec oraz mapowanie chromosomu do wartości x z zakresu (Xmin,Xmax)
         wartosc = funkcja(argument) # wartość funkcji w punkcie x
-        if wartosc<0: wartosc=0 # wyzerowanie wartości ujemnych; można użyć metody +shift (sztucznie podnieść wartości znanej funkcji) lub korzystać z wartości e^(fx)
+        wartosc=math.exp(wartosc) # Algorytm koła ruletki nie dopuszcza ujemnych wartości funkcji celu, używamy funkcji wykładniczej e^
+        # if wartosc<0: wartosc=0 # zarzucona metoda zerowania wartości ujemnych
         ewaluacja.append([argument, wartosc])  # dodanie wartości do listy
         
     if output:
         print("\nDopasowanie poszczególnych osobników populacji do funkcji celu: ")
         print(*ewaluacja, sep="\n")
-        F = [sum(i) for i in zip(*ewaluacja)] #obliczamy dopasowanie całej populacji (F)
+        F = [sum(i) for i in zip(ewaluacja)] #obliczamy dopasowanie całej populacji (F)
         print("Suma dopasowań dla populacji: %s \n" % F[1])
     return(ewaluacja) # zwraca listę krotek argument-wartość dla danej populacji
 
@@ -105,7 +107,7 @@ def f_Pselekcji(ewaluacja, output=False):
 		for x in ewaluacja: Ps.append(x[1]/F[1])
 	except:
 		print("Błąd obliczania prawdopodobieństw selekcji (Ps).")
-	if output: print("Wartosci Ps dla kazdego osobnika: %s"% Ps)
+	if output: print("Suma Ps, prawidłowo powinna wynosić 1: %s"% sum(Ps)) # print("Wartosci Ps dla kazdego osobnika: %s"% Ps)
 	return(Ps)
 
 # selekcja - metoda koła ruletki (sektory dla Ps)
@@ -119,7 +121,7 @@ def f_Ruletka_osobnik(p_selekcji, populacja, output=False):
 
 	if output: print("Koło ruletki: ", *ruletka)
 
-	losowa = rand.random() # losujemy liczbę z przedziału (0,1) tyle razy, ile osobników w populacji
+	losowa = rand.random() # losujemy liczbę z przedziału (0,1)
 	sektor = 0 # zaczynamy od sektora zero
 
 	for j in range(len(ruletka)): # sprawdzamy, do którego sektora na kole ruletki wpadła wylosowana liczba
@@ -143,21 +145,24 @@ def f_Krzyzowanie(parent_1, parent_2, output = False):
     if output: 
         print("Para rodziców: %s x %s, Krzyżowanie po bicie: %s" % (parent_1, parent_2, punkt_krzyzowania))
         print("Para potomków: %s - %s \n" % (dziecko_1, dziecko_2))
-    return [dziecko_1, dziecko_2] # lista dla dwóch zwracanych wartości
+    return [dziecko_1, dziecko_2, punkt_krzyzowania] # lista dla dwóch zwracanych wartości
 
 
 def f_Mutagen(mutant, output = False): 
     pozycja_mutacji = rand.randint(0, m-1)
+    if output: print("Mutacja osobnika:\t%s na pozycji: %s" % (mutant, pozycja_mutacji+1))
     mutant[pozycja_mutacji] = not(mutant [pozycja_mutacji])
-    if output: print("Mutacja na pozycji %s:\t %s \n" % (pozycja_mutacji+1, mutant))
+    if output: print("Osobnik po mutacji:\t%s\n" % (mutant))
     return(mutant)
 
 
 # f_Pokolenie() - wyznacza kolejną pulę osobników z uwzględnieniem algorytmu genetycznego 
 def f_Pokolenie(pula, output = False):
 
+	rand.seed()
+	
 	ewaluacja_pokolenia = f_Ewaluacja(pula, False) # obliczamy wartosci funkcji dla puli osobnikow (jednego pokolenia) (wynik: tablica krotek [x,y])
-	prawdopodobienstwo_sel = f_Pselekcji(ewaluacja_pokolenia, False) # obliczamy prawdopodobienstwo selekcji dla poszczegolnych osobnikow (wynik: Ps)
+	prawdopodobienstwo_sel = f_Pselekcji(ewaluacja_pokolenia) # obliczamy prawdopodobienstwo selekcji dla poszczegolnych osobnikow (wynik: Ps)
 
 	global iteracja
 	global wartosc_srednia_ew
@@ -177,37 +182,42 @@ def f_Pokolenie(pula, output = False):
 			pokolenie_dzieci.append(rodzic_1)
 		elif operacja > Pm:
 			rodzic_2 = f_Ruletka_osobnik(prawdopodobienstwo_sel, pula)
-			if output: print("Krzyżowanie osobnikow: %s x %s" % (i, *rodzic_1, *rodzic_2))
 			potomstwo = f_Krzyzowanie(rodzic_1, rodzic_2, False)
+			if output: print("Krzyżowanie:\t%s x %s pk: %s" % (rodzic_1, rodzic_2, potomstwo[2]))
+			
 			try:
 				next(numeracja) # próba przeskoczenia iteracji o 2, jeśl się nie uda, do kolejnej puli jest dopisywane tylko jedno "dziecko"
 				pokolenie_dzieci.append(potomstwo[0]) # tutaj też jest brzydko, bo mamy na twardo "rodzinę 2+2"
 				pokolenie_dzieci.append(potomstwo[1])
 			except:
 				pokolenie_dzieci.append(potomstwo[0])
+			if output: print("Potomstwo:\t%s - %s\n" % (potomstwo[0], potomstwo[1]))
 		else:
-			if output: print("Mutacja osobnika: \t %s" % (rodzic_1))
-			pokolenie_dzieci.append(f_Mutagen(f_Ruletka_osobnik(prawdopodobienstwo_sel, pula), False)) # pokolenie_dzieci = f_CMC(pokolenie_rodzicow)
+			# if output: print("Mutacja: \t %s" % (rodzic_1))
+			pokolenie_dzieci.append(f_Mutagen(rodzic_1)) # pokolenie_dzieci = f_CMC(pokolenie_rodzicow)
 	
 	F = [sum(i) for i in zip(*ewaluacja_pokolenia)]
 	mean_x = round(F[0]/len(pula),d)
-	mean_y = round(F[1]/len(pula),d)
-	wartosc_srednia_ew.append([mean_x, mean_y])
-
-	# print("Krotki w pokoleniu:", *ewaluacja_pokolenia, sep="\n")
-	# max_xy = list(map(max, zip(*ewaluacja_pokolenia)))
-	# #max_xy = ewaluacja_pokolenia[1].index("0")
-	# print("Maksymalna krotka w pokoleniu:", max_xy)
+	mean_y = F[1]/len(pula)
+	mean_y = math.log(mean_y) # zamiana wartości funkcji z e^f(x) na wartość docelową f(x)
+	mean_y = round(mean_y,d)
+	wartosc_srednia_ew.append([mean_x, mean_y]) 
 
 	iteracja = iteracja + 1
 	
 	# rekurencja po zmiennej "iteracja" do zmiennej "Gen" - główna pętla programu
 	if iteracja >= Gen:
 		print("Przetworzono ostatnie pokolenie nr %s:" % iteracja)
-		print("Pokolenie %s, średni_argument: %s \t średnia wartosc f(x) w pokoleniu: %s"% (("{0:0=2d}".format(iteracja)), mean_x, mean_y))
+		print("Pokolenie %s, \t średnia wartosc f(x) w pokoleniu: %s"% (("{0:0=2d}".format(iteracja)), mean_y))
+
+		max_y_x=max(ewaluacja_pokolenia,key=itemgetter(1))[0]
+		max_y = math.log(max(ewaluacja_pokolenia,key=itemgetter(1))[1])
+
+		print("Maksymalna odnaleziona wartość funkci: %s dla argumentu %s" % (round(max_y,d), round(max_y_x,d)))
 		return(pokolenie_dzieci)
+
 	else:
-		print("Pokolenie %s, średni_argument: %s \t średnia wartosc f(x) w pokoleniu: %s"% (("{0:0=2d}".format(iteracja)), mean_x, mean_y))
+		print("Pokolenie %s, \t średnia wartosc f(x) w pokoleniu: %s"% (("{0:0=2d}".format(iteracja)), mean_y))
 		return(f_Pokolenie(pokolenie_dzieci))
 
 
@@ -242,13 +252,8 @@ def form_button():
         start = time.time()
         ostatnie_pokolenie=f_Pokolenie(pierwsze_pokolenie)
         end = time.time()
-        
-        
 
-        
-
-
-        form_max_value.set(10)
+        # form_max_value.set(10)
         form_duration.set("Czas: %s sekund"% round(end-start,3))
 
         #print("wartosc_srednia_ew ", *wartosc_srednia_ew, sep="\n")
@@ -258,7 +263,7 @@ def form_button():
 
 root=tk.Tk()
 
-root.title("Laboratorium 3: Algorytm genetyczny, wyznaczanie max funkcji. R.Majkowski (233256), M. Witomski (233270)")
+root.title("Laboratorium 3: Algorytm genetyczny. R.Majkowski (233256), M. Witomski (233270)")
 root.configure(bg='white', padx=20, pady=20)
 
 form_pop_size = IntVar()
@@ -283,9 +288,9 @@ tk.Label(root, text="P. mutacji: ", bg = "white", padx = 10).grid(row=1, column=
 
 tk.Button(text="Uruchom", command = form_button).grid(row=0, column=4, padx=10, sticky=tk.W)
 
-form_max_value = DoubleVar() # testowa kontrolka dla dowolnej wartości
-form_max_value.set(0)
-tk.Label(root, textvariable=form_max_value, bg="white").grid(row=2, column=0, padx=10, sticky=tk.W)
+# form_max_value = DoubleVar() # testowa kontrolka dla dowolnej wartości
+# form_max_value.set(0)
+# tk.Label(root, textvariable=form_max_value, bg="white").grid(row=2, column=0, padx=10, sticky=tk.W)
 
 form_duration = DoubleVar() 
 form_duration.set(0)
