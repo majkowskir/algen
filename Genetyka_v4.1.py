@@ -40,14 +40,14 @@ def funkcja(argument):
     return(y+shift)
 
 # pop_size - liczebność populacji, dobrze, aby była parzysta
-pop_size = 150
+pop_size = 5
 
 # Parametry początkowe programu: liczba pokoleń (Gen), liczba zmiennych w funkcji (k), przedział (Xmin, Xmax), dokładność (d)
-Gen = 50
+Gen = 5
 
 # prawdopodobieństwa: krzyżowania (Pc) oraz mutacji (Pm)
-Pc = 0.25
-Pm = 0.01
+Pc = 0.0
+Pm = 0.0
 
 # przedział w którym badamy funkcję (Xmin do Xmax)
 # uwaga: w zadaniu występują tylko wartości dodatnie, nie ma potrzeby przesuwania przedziału
@@ -98,13 +98,14 @@ def f_Ewaluacja(pula, output=False):
 # f_Pselekcji() - przyjmuje zestaw wartości funkcji, docelowo wynik działania f_Ewaluacja()
 # zwraca - lista wartości z zakresu 0-1, dystrybuanta; niezbędna do działania f_Ruletka() 
 
-def f_Pselekcji(ewaluacja, output=False):
+def f_Pselekcji(ewaluacja, output=True):
 	F = [sum(i) for i in zip(*ewaluacja)] # https://www.geeksforgeeks.org/python-position-summation-in-list-of-tuples/
+	print("Suma krotek F", F, sep="\n")
 	Ps=[] # prawdopodobieństwo wyboru (selekcji, Ps) dla każdego chromosomu
 	try:
 		for x in ewaluacja: Ps.append(x[1]/F[1])
 	except:
-		print("Błąd obliczania prawdopodobieństw selekcji (Ps).")
+		print("Błąd obliczania prawdopodobieństw selekcji (Ps). Suma wartosci Funkcji: %s" % F[1])
 	if output: print("Wartosci Ps dla kazdego osobnika: %s"% Ps)
 	return(Ps)
 
@@ -146,17 +147,20 @@ def f_Krzyzowanie(parent_1, parent_2, output = False):
     return [dziecko_1, dziecko_2] # lista dla dwóch zwracanych wartości
 
 
-def f_Mutagen(mutant, output = False): 
+def f_Mutagen(mutant, output = True): 
     pozycja_mutacji = rand.randint(0, m-1)
-    mutant[pozycja_mutacji] = not(mutant [pozycja_mutacji])
-    if output: print("Mutacja na pozycji %s:\t %s \n" % (pozycja_mutacji+1, mutant))
+    if output: print("Mutacja osobnika na pozycji %s:\t %s" % (pozycja_mutacji+1, mutant))
+    mutant[pozycja_mutacji] = not(mutant[pozycja_mutacji])
+    #mutant[pozycja_mutacji] = abs((mutant[pozycja_mutacji]-1))
+    if output: print("Nowy osobnik: %s \n" % (mutant))
     return(mutant)
 
 
 # f_Pokolenie() - wyznacza kolejną pulę osobników z uwzględnieniem algorytmu genetycznego 
-def f_Pokolenie(pula, output = False):
+def f_Pokolenie(pula, output = True):
 
-	ewaluacja_pokolenia = f_Ewaluacja(pula, False) # obliczamy wartosci funkcji dla puli osobnikow (jednego pokolenia) (wynik: tablica krotek [x,y])
+	ewaluacja_pokolenia = f_Ewaluacja(pula, True) # obliczamy wartosci funkcji dla puli osobnikow (jednego pokolenia) (wynik: tablica krotek [x,y])
+	
 	prawdopodobienstwo_sel = f_Pselekcji(ewaluacja_pokolenia, False) # obliczamy prawdopodobienstwo selekcji dla poszczegolnych osobnikow (wynik: Ps)
 
 	global iteracja
@@ -177,17 +181,19 @@ def f_Pokolenie(pula, output = False):
 			pokolenie_dzieci.append(rodzic_1)
 		elif operacja > Pm:
 			rodzic_2 = f_Ruletka_osobnik(prawdopodobienstwo_sel, pula)
-			if output: print("Krzyżowanie osobnikow: %s x %s" % (i, *rodzic_1, *rodzic_2))
+			if output: print("Krzyżowanie osobnikow:\t %s x %s" % (rodzic_1, rodzic_2))
 			potomstwo = f_Krzyzowanie(rodzic_1, rodzic_2, False)
 			try:
 				next(numeracja) # próba przeskoczenia iteracji o 2, jeśl się nie uda, do kolejnej puli jest dopisywane tylko jedno "dziecko"
 				pokolenie_dzieci.append(potomstwo[0]) # tutaj też jest brzydko, bo mamy na twardo "rodzinę 2+2"
 				pokolenie_dzieci.append(potomstwo[1])
+				if output: print("Potomostwo:\t\t %s - %s \n" % (potomstwo[0], potomstwo[1]))
 			except:
 				pokolenie_dzieci.append(potomstwo[0])
+				if output: print("Potomek:\t\t %s \n" % (potomstwo[0]))
 		else:
 			if output: print("Mutacja osobnika: \t %s" % (rodzic_1))
-			pokolenie_dzieci.append(f_Mutagen(f_Ruletka_osobnik(prawdopodobienstwo_sel, pula), False)) # pokolenie_dzieci = f_CMC(pokolenie_rodzicow)
+			pokolenie_dzieci.append(f_Mutagen(f_Ruletka_osobnik(prawdopodobienstwo_sel, pula))) # pokolenie_dzieci = f_CMC(pokolenie_rodzicow)
 	
 	F = [sum(i) for i in zip(*ewaluacja_pokolenia)]
 	mean_x = round(F[0]/len(pula),d)
